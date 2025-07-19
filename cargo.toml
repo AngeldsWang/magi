@@ -1,0 +1,22 @@
+[package]
+name = "magi"
+version = "0.1.0"
+edition = "2021"
+description = "Magi: Declarative AI Agent Framework and Runtime"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+anyhow = "1.0"
+
+
+[workspace]
+members = [
+  "crates/magi-core",
+  "crates/magi-dsl",
+  "crates/magi-runtime",
+  "crates/magi-tools",
+  "crates/magi-cli"
+]

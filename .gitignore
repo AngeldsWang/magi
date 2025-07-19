@@ -1,0 +1,40 @@
+# Rust / Cargo
+/target/
+/**/target/
+**/*.rs.bk
+**/*.rs.bak
+**/*.swp
+**/*.swo
+
+# Dependency lock files (only ignore if you're not version-controlling them)
+# Cargo.lock
+
+# IDEs and editors
+/.idea/
+/.vscode/
+/*.code-workspace
+
+# Mac OS
+.DS_Store
+
+# Logs and debugging
+*.log
+*.trace
+*.dump
+
+# Byproducts
+*.out
+*.tmp
+*.old
+*.bak
+
+# Pest parser debugging
+**/grammar.pest.pest
+
+# Test and local dev
+examples/*.json
+examples/*.yaml
+examples/*.out
+examples/*.plan
+examples/*.cache
+

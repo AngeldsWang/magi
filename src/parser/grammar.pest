@@ -1,0 +1,190 @@
+// Magi Agent DSL Grammar
+
+// Whitespace and comments
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* ~ "\n"? }
+
+// File structure
+file = { SOI ~ (import_stmt | agent_def | template_def | workflow_def)* ~ EOI }
+
+// Import statements
+import_stmt = { "import" ~ string_literal ~ ("as" ~ identifier)? ~ ";" }
+
+// Agent definition
+agent_def = {
+    decorator* ~
+    "agent" ~ identifier ~ "{" ~
+        agent_body ~
+    "}"
+}
+
+agent_body = { (property | llm_block | tools_block | handler | function_def)* }
+
+// Template definition
+template_def = {
+    "template" ~ identifier ~ "(" ~ param_list? ~ ")" ~ "{" ~
+        template_body ~
+    "}"
+}
+
+template_body = { template_string }
+
+// Workflow definition
+workflow_def = {
+    "workflow" ~ identifier ~ "{" ~
+        workflow_body ~
+    "}"
+}
+
+workflow_body = { (step_def | parallel_block | conditional_block)* }
+
+// Properties
+property = { identifier ~ ":" ~ expression ~ ";" }
+
+// LLM configuration
+llm_block = {
+    "llm" ~ "{" ~
+        llm_config* ~
+    "}"
+}
+
+llm_config = { identifier ~ ":" ~ expression ~ ";" }
+
+// Tools configuration
+tools_block = {
+    "tools" ~ "{" ~
+        tool_config* ~
+    "}"
+}
+
+tool_config = { tool_def | tool_use }
+tool_def = { "define" ~ identifier ~ "(" ~ param_list? ~ ")" ~ "->" ~ type_spec ~ block }
+tool_use = { "use" ~ identifier ~ ("as" ~ identifier)? ~ ";" }
+
+// Handlers
+handler = {
+    decorator* ~
+    "on" ~ event_type ~ block
+}
+
+event_type = { "message" | "start" | "error" | "tool_call" | identifier }
+
+// Functions
+function_def = {
+    decorator* ~
+    "fn" ~ identifier ~ "(" ~ param_list? ~ ")" ~ ("->" ~ type_spec)? ~ block
+}
+
+// Workflow steps
+step_def = {
+    "step" ~ identifier ~ "{" ~
+        step_body ~
+    "}"
+}
+
+step_body = { (property | action)* }
+
+action = { "call" ~ identifier ~ "(" ~ arg_list? ~ ")" ~ ";" }
+
+// Control flow
+parallel_block = {
+    "parallel" ~ "{" ~
+        step_def* ~
+    "}"
+}
+
+conditional_block = {
+    "if" ~ expression ~ "{" ~
+        workflow_body ~
+    "}" ~
+    ("else" ~ "{" ~
+        workflow_body ~
+    "}")?
+}
+
+// Expressions
+expression = {
+    literal |
+    identifier |
+    binary_expr |
+    unary_expr |
+    call_expr |
+    field_access |
+    array_expr |
+    object_expr
+}
+
+binary_expr = { expression ~ binary_op ~ expression }
+unary_expr = { unary_op ~ expression }
+call_expr = { identifier ~ "(" ~ arg_list? ~ ")" }
+field_access = { expression ~ "." ~ identifier }
+array_expr = { "[" ~ (expression ~ ("," ~ expression)*)? ~ "]" }
+object_expr = { "{" ~ (object_field ~ ("," ~ object_field)*)? ~ "}" }
+
+object_field = { identifier ~ ":" ~ expression }
+
+// Operators
+binary_op = { "+" | "-" | "*" | "/" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "&&" | "||" }
+unary_op = { "!" | "-" }
+
+// Parameters and arguments
+param_list = { param ~ ("," ~ param)* }
+param = { identifier ~ (":" ~ type_spec)? ~ ("=" ~ expression)? }
+
+arg_list = { expression ~ ("," ~ expression)* }
+
+// Types
+type_spec = {
+    "string" |
+    "number" |
+    "boolean" |
+    "any" |
+    array_type |
+    identifier
+}
+
+array_type = { type_spec ~ "[]" }
+
+// Blocks
+block = { "{" ~ statement* ~ "}" }
+
+statement = {
+    let_stmt |
+    return_stmt |
+    expression_stmt |
+    if_stmt |
+    for_stmt
+}
+
+let_stmt = { "let" ~ identifier ~ (":" ~ type_spec)? ~ "=" ~ expression ~ ";" }
+return_stmt = { "return" ~ expression? ~ ";" }
+expression_stmt = { expression ~ ";" }
+
+if_stmt = {
+    "if" ~ expression ~ block ~
+    ("else" ~ block)?
+}
+
+for_stmt = {
+    "for" ~ identifier ~ "in" ~ expression ~ block
+}
+
+// Decorators
+decorator = { "@" ~ identifier ~ ("(" ~ arg_list? ~ ")")? }
+
+// Literals
+literal = {
+    string_literal |
+    number_literal |
+    boolean_literal |
+    null_literal
+}
+
+string_literal = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+template_string = @{ "`" ~ (!"`" ~ ANY)* ~ "`" }
+number_literal = @{ "-"? ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+boolean_literal = { "true" | "false" }
+null_literal = { "null" }
+
+// Identifiers
+identifier = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }

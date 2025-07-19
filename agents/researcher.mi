@@ -1,0 +1,27 @@
+agent "researcher" {
+  planner = "LLMPlanner"
+  executor = "SkillExecutor"
+
+  memory {
+    backend = "vector"
+    embedder = "openai"
+  }
+
+  tools = [
+    "WebSearch",
+    "Scraper",
+    "Summarizer",
+    "PDFReader"
+  ]
+
+  personality {
+    tone = "curious"
+    risk_profile = "analytical"
+  }
+
+  policy {
+    max_depth = "4"
+    allowed_domains = "edu,org"
+    retry_limit = "2"
+  }
+}

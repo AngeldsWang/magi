@@ -1,0 +1,14 @@
+agent_def     = { "agent" ~ string ~ "{" ~ (kv_pair | tools_list | memory_block | personality_block | policy_block)* ~ "}" }
+
+kv_pair       = { ident ~ (":" | "=") ~ value }
+tools_list    = { "tools" ~ "=" ~ "[" ~ (value ~ ("," ~ value)*)? ~ "]" }
+
+memory_block      = { "memory" ~ "{" ~ kv_pair* ~ "}" }
+personality_block = { "personality" ~ "{" ~ kv_pair* ~ "}" }
+policy_block      = { "policy" ~ "{" ~ kv_pair* ~ "}" }
+
+ident         = @{ (ASCII_ALPHANUMERIC | "_")+ }
+string        = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+value         = { string | ident }
+
+WHITESPACE    = _{ " " | "\t" | "\r" | "\n" }
